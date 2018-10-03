@@ -1,0 +1,146 @@
+db.robery_events.insert(
+	[
+		{
+			"_id" : 1,
+			"rob_place":"puente aranda",
+			"rob_victime_id": 1111171486,
+			"rob_type":"mano armada",
+			"rob_object_lost":"celular"
+		},
+		{
+			"_id" : 2,
+			"rob_place":"teusaquillo",
+			"rob_victime_id": 1001172536,
+			"rob_type":"raponazo",
+			"rob_object_lost":"dinero"
+		},
+		{
+			"_id" : 3,
+			"rob_place":"usme",
+			"rob_victime_id": 1001251486,
+			"rob_type":"cosquilleo",
+			"rob_object_lost":"celular"
+		}
+	]
+
+)
+db.violence_events.insert(
+	[
+		{
+			"_id": 1,
+			"vio_type":"domestica",
+			"vio_place":"cuidad bolivar",
+			"vio_victime_id": 1001173456
+		},
+		{
+			"_id": 2,
+			"vio_type":"agresion fisica",
+			"vio_place":"ciudad bolivar",
+			"vio_victime_id": 1002573456
+		},
+		{
+			"_id": 3,
+			"vio_type":"agresion de género",
+			"vio_place":"chico",
+			"vio_victime_id": 1002373456
+		}
+
+	]
+)
+
+db.person.insert(
+	[
+		{
+			"_id": 1001173456,
+			"per_teleṕhone":322456,
+			"per_scolarship_level":"bachiller",
+			"per_name": "pedro",
+			"per_last_name": "perez",
+			"address": "cra 25 · 30 -62",
+			"per_age": 25,
+			"per_marital_status": "soltero",
+			"ocupation": "estudiante",
+		},
+		{
+			"_id": 1002573456,
+			"per_teleṕhone":311456,
+			"per_scolarship_level":"universitario",
+			"per_name": "juan",
+			"per_last_name": "rueda",
+			"address": "cra 15 · 50 -32",
+			"per_age": 25,
+			"per_marital_status": "casado",
+			"ocupation": "estudiante",
+		},
+	]
+)
+
+db.cost_life.insert(
+	[
+		{
+			"_id": 1,
+			"lif_zone":"cuidad bolivar",
+			"lif_stratum": 3,
+			"lif_life_cost": 100000,
+			"lif_person_life_cost": 1001173456
+		},
+		{
+			"_id": 2,
+			"lif_zone":"cuidad bolivar",
+			"lif_stratum": 3,
+			"lif_life_cost": 200000,
+			"lif_person_life_cost": 1002573456
+		},
+		{
+			"_id": 3,
+			"lif_zone":"chico",
+			"lif_stratum": 5,
+			"lif_life_cost": 500000,
+			"lif_person_life_cost": 1002573456
+		}
+
+	]
+)
+
+db.institution_rate.insert(
+	[
+		{
+			"_id": 1,
+			"inst_name":"procuraduria",
+			"inst_type": "estado",
+			"inst_grade": 3,
+			"inst_person_use_id": 1001173456
+		},
+		{
+			"_id": 2,
+			"inst_name":"hospital san jose",
+			"inst_type": "hospital",
+			"inst_grade": 5,
+			"inst_person_use_id": 1002573456
+		},
+		{
+			"_id": 3,
+			"inst_name":"colegio ITC",
+			"inst_type": "colegio",
+			"inst_grade": 5,
+			"inst_person_use_id": 1002573456
+		}
+
+	]
+)
+
+
+
+
+
+
+
+    db.createUser(
+      {
+        user: "root",
+        pwd: "example",
+        roles: [ { role: "readWrite", db: "analysis_data" } ]
+      }
+    )
+
+mongo --host 192.168.99.102:27017 -u root -p 'example' --authenticationDatabase 'admin'

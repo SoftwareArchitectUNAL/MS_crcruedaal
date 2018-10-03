@@ -1,0 +1,126 @@
+import psycopg2
+import geohash
+import mpu
+from pymongo import MongoClient
+
+
+def get_mongo_instance():
+    connection_str = 'mongodb://hackathonmongo:hackathon2018rappimongodb@mongo-hackathon.eastus2.cloudapp.azure.com:27017/orders'
+    client = MongoClient(connection_str)
+    return client
+
+
+def get_psql_instance():
+    host = "postgres-hackathon.eastus2.cloudapp.azure.com"
+    database = "storekeepersdb"
+    user = "hackathonpostgres"
+    password = "hackathon2018rappipsql"
+    client = psycopg2.connect(host=host, database=database, user=user, password=password)
+    return client
+
+
+def build_filter(params):
+    filter_stmt = " WHERE TRUE "
+    for param in params:
+        if param is not None:
+            if param[2] == 0:
+                if param[1] != None: filter_stmt += "AND {} = {} ".format(param[0], param[1])
+            else:
+                ins = ""
+                for e in param[1]: ins += "'" + str(e) + "'" + ","
+                if param[1] != None: filter_stmt += "AND toolkit->>'{}' IN ({})".format(param[0], ins[:-1])
+    return filter_stmt
+
+def geohash_encode( lat, lng, precision ):
+    result = geohash.encode(lat, lng, precision=precision)
+    return result
+
+def add_geohash(order, filter_hash):
+    order['geohash'] = geohash.encode(order['lat'], order['lng'], precision=len(filter_hash))
+    return order 
+
+def geohash_filter(orders, filter_hash):
+    orders = map(lambda order: add_geohash(order, filter_hash), orders)
+    return filter(lambda order: geohash.encode(order['lat'], order['lng'], precision=len(filter_hash)) == filter_hash, orders)
+
+def geo_distance( A, B ):
+    lat1 = A[0]
+    lon1 = A[1]
+
+    lat2 = B[0]
+    lon2 = B[1]
+
+    # What you were looking for
+    dist = mpu.haversine_distance((lat1, lon1), (lat2, lon2))
+    return dist
+
+def reduce_counter(A):
+    group = {}
+    for k,v in A:
+        if k not in group:
+            group[k] = 1
+        else:
+            group[k] = group[k] + v
+    return group
+
+def get_orders(client_mongo, timestamp, order_type, geohash):
+    orders_table = client_mongo.orders
+    orders = orders_table.orders.find({"timestamp":timestamp,"type":{"$in": order_type}}, {"lat": 1, "lng": 1, "type":1, "timestamp":1, "_id": 0, "id": 1})
+    if geohash is not None:
+        orders = geohash_filter(orders, geohash)
+    return orders
+
+
+
+def get_storekeepers(client_psql, timestamp, vehicle, geohash, storekeeper):
+    filter_stmt = build_filter([("timestamp", timestamp, 0), ("vehicle", vehicle, 1),("storekeeper_id", storekeeper,0)])
+    print('SELECT lat, lng, storekeeper_id FROM Storekeepers ' + filter_stmt)
+    cur = client_psql.cursor()
+    cur.execute('SELECT lat, lng, storekeeper_id FROM Storekeepers ' + filter_stmt)
+    raw = cur.fetchall()
+    result = map(lambda record: {"lat": float(record[0]), "lng": float(record[1]), 'storekeeper_id': record[2]}, raw)
+    if geohash is not None:
+        result = geohash_filter(result, geohash)
+    cur.close()
+    return result
+
+def get_mongo_instance():
+    connection_str = 'mongodb://admin:1234@localhost:27017/analysis_data'
+    client = MongoClient(connection_str)
+    return client
+
+mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database][?options]]
+
+db.createUser(
+  {
+    user: "admin",
+    pwd: "1234",
+    roles: [
+       { role: "readWrite", db: "analysis_data" }
+    ]
+  }
+)
+
+db.createUser(
+  {
+    user: "admin",
+    pwd: "1234",
+    roles: [ { role: "userAdminAnyDatabase", db: "admin" }, "readWriteAnyDatabase" ]
+  }
+)
+----------- - - - - - - database commands -------------------
+
+db.violence_events.insert(
+    [
+        { _id:1, vio_type:"violencia domestica", vio_place: "puente aranda", vio_victime: 1 },
+        { _id:2, vio_type:"agresion fisica", vio_place: "teusaquillo", vio_victime: 2 },
+        { _id:3, vio_type:"violencia domestica", vio_place: "teusaquillo", vio_victime: 1 }
+    ]
+)
+db.violence_events.insert(
+    [
+        { _id:1, vio_type:"violencia domestica", vio_place: "puente aranda", vio_victime: 1 },
+        { _id:2, vio_type:"agresion fisica", vio_place: "teusaquillo", vio_victime: 2 },
+        { _id:3, vio_type:"violencia domestica", vio_place: "teusaquillo", vio_victime: 1 }
+    ]
+)
