@@ -3,12 +3,12 @@ services:
   analysis_data-ms:
     build: .
     ports:
-      - "5000:5000"
+      - "4000:4000"
     # depends_on:
     #   # analysis_data-db:
     #   #   condition: service_healthy
     healthcheck:
-      test: "curl -I analysis_data-ms:5000/analysis_data/violence_events/ --fail"
+      test: "curl -I analysis_data-ms:4000/analysis_data/violence_events/ --fail"
       interval: 20s
       retries: 10
 
@@ -16,7 +16,7 @@ services:
     image: mongo
     restart: always
     environment:
-      # MONGO_INITDB_DATABASE: analysis_data
+      #MONGO_INITDB_DATABASE: analysis_data
       MONGO_INITDB_ROOT_USERNAME: "root"
       MONGO_INITDB_ROOT_PASSWORD: "example"
 

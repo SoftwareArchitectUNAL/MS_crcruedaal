@@ -10,6 +10,8 @@ import json
 
 def init():
 	global client_mongo
+	global port
+	port = 4000
 	client_mongo = get_mongo_instance()
 
 app = Flask(__name__)
@@ -37,9 +39,9 @@ def get_violence_event(event_id):
 	elif request.method == 'PUT':
 	    data = {
 			"_id": event_id,
-			"vio_type":request.json['type'],
-			"vio_place": request.json['place'],
-			"vio_victime_id": request.json['victime_id']
+			"vio_type":request.json["vio_type"],
+			"vio_place": request.json["vio_place"],
+			"vio_victime_id": request.json["vio_victime_id"]
 	    	}
 	    client_mongo.analysis_data.violence_events.update({"_id":event_id},{ "vio_victime_id" : data["vio_victime_id"], \
 		 "vio_place" : data["vio_place"],\
@@ -50,17 +52,22 @@ def get_violence_event(event_id):
 		return "event {} succesfully deleted".format(event_id),201 
 #http://0.0.0.0:5000/analysis_data/violence_events/
 @app.route('/analysis_data/violence_events/', methods=['POST'])
+
 def create_violence_event():
-    if not request.json or not 'id' in request.json:
-        abort(400)
-    data = {
-		"_id": request.json['id'],
-		"vio_type":request.json['type'],
-		"vio_place": request.json['place'],
-		"vio_victime_id": request.json['victime_id']
+	print ("-- Request:")
+	print request.json
+	if not request.json or not "_id" in request.json:
+		print ("-- Request:")
+		print request.json
+		abort(400)
+	data = {
+		"_id": request.json["_id"],
+		"vio_type":request.json["vio_type"],
+		"vio_place": request.json["vio_place"],
+		"vio_victime_id": request.json["vio_victime_id"]
     	}
-    client_mongo.analysis_data.violence_events.insert(data)
-    return jsonify({'data': data}),201
+	client_mongo.analysis_data.violence_events.insert(data)
+	return jsonify({'data': data}),201
 
 @app.errorhandler(404)
 def not_found(error):
@@ -69,4 +76,4 @@ def not_found(error):
 
 if __name__ == '__main__':
 	init()
-	app.run(debug=True,host='0.0.0.0')
+	app.run(debug=True,host='0.0.0.0',port=port)

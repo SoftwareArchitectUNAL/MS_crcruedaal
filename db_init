@@ -133,7 +133,31 @@ db.institution_rate.insert(
 
 
 
+use analysis_data
 
+db.violence_events.insert(
+	[
+		{
+			"_id": 1,
+			"vio_type":"domestica",
+			"vio_place":"cuidad bolivar",
+			"vio_victime_id": 1001173456
+		},
+		{
+			"_id": 2,
+			"vio_type":"agresion fisica",
+			"vio_place":"ciudad bolivar",
+			"vio_victime_id": 1002573456
+		},
+		{
+			"_id": 3,
+			"vio_type":"agresion de género",
+			"vio_place":"chico",
+			"vio_victime_id": 1002373456
+		}
+
+	]
+)
 
     db.createUser(
       {
